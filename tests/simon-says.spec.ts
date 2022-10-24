@@ -1,17 +1,19 @@
 import { test } from "@playwright/test";
 
-const games = 15;
+const gamePoints = 15;
 
-test("Play The Game", async ({ page }) => {
+test("Simon Says", async ({ page }) => {
 	await page.goto("https://weslleyaraujo.github.io/react-simon-says/");
 	await page.getByRole("link", { name: "Play" }).click();
 
 	let observationTimeout = 1500;
-	for (let i = 0; i < games; i++) {
+	for (let i = 0; i < gamePoints; i++) {
 		observationTimeout = observationTimeout + 450;
 		const sequence = await observe(page, observationTimeout);
 		await clickItems(page, sequence);
 	}
+
+	// just to keep window open
 	await new Promise(() => {});
 });
 
