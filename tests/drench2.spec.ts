@@ -12,7 +12,7 @@ const Color = {
 
 test("Play The Game - Drench2", async ({ page }) => {
 	await page.goto("http://www.flashbynight.com/drench2/");
-  
+
   const play9x9ButtonSelector = '#butang1'
 	await page.waitForSelector(play9x9ButtonSelector)
 	await page.click(play9x9ButtonSelector);
@@ -74,7 +74,7 @@ const calculateWinner = initialState => {
 
 const getState = async page => {
   const rgb = await page.$$eval('.square', elements => 
-  elements.map(element => element.attributes.style.nodeValue.match(/color: (.*);/)[1]))
+    elements.map(element => element.attributes.style.nodeValue.match(/color: (.*);/)[1]))
   return rgb.map(color => getColorByCode(color))
 }
 
