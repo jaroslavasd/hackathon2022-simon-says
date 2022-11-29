@@ -1,38 +1,37 @@
 import { test } from "@playwright/test";
 
-const gamePoints = 15;
+test("Play The Game - Simon Says", async ({ page }) => {
+	const gamePoints = 10;
 
-test("Simon Says", async ({ page }) => {
 	await page.goto("https://weslleyaraujo.github.io/react-simon-says/");
-	await page.getByRole("link", { name: "Play" }).click();
+	const playButtonSelector = '//a[contains(string(), "Play")]'
+	await page.waitForSelector(playButtonSelector)
+	await page.click(playButtonSelector);
 
-	let observationTimeout = 1500;
+	console.log('PLAYING...')
+	const observationTimeout = 2000;
 	for (let i = 0; i < gamePoints; i++) {
-		observationTimeout = observationTimeout + 450;
-		const sequence = await observe(page, observationTimeout);
-		await clickItems(page, sequence);
+		const sequence = await observe(observationTimeout + i * 300, page);
+		await clickItems(sequence, page);
 	}
+
+  console.log('END')
 
 	// just to keep window open
 	await new Promise(() => {});
 });
 
-const observe = async (page, observationTimeout) => {
-	return await page.evaluate(async (observationTimeout) => {
+const observe = async (observationTimeout, page) => {
+	return await page.evaluate(async observationTimeout => {
 		const targetNode = document.querySelector("#root");
 		const config = { attributes: true, subtree: true };
 
 		const items: string[] = [];
-
-		const func = (mutationList) => {
-			for (const mutation of mutationList) {
-				if (mutation.target.id) {
-					items.push(mutation.target.id);
-				}
-			}
-		};
-
-		const observer = new MutationObserver(func);
+		const mutationFunc = mutationList => 
+			mutationList.forEach(mutation => mutation.target.id ? items.push(mutation.target.id) : '')
+		
+		const observer = new MutationObserver(mutationFunc);
+		
 		observer.observe(targetNode!, config);
 
 		return await new Promise((resolve) => {
@@ -44,18 +43,12 @@ const observe = async (page, observationTimeout) => {
 	}, observationTimeout);
 };
 
-const clickItems = async (page, items) => {
-	const odds = items.filter((value, index) => {
-		return index % 2 !== 0;
-	});
+const clickItems = async (items, page) => {
+	const odds = items.filter((value, index) => index % 2 !== 0);
 
-	console.log("Items to click: " + odds);
+	console.log(`Items to click (${odds.length}): ${odds}`);
 	for (let i = 0; i < odds.length; i++) {
-		const selector = odds[i];
-		console.log("Clicking:" + selector);
-		await page.click(`#${selector}`);
-		await page.evaluate(async () => {
-			setTimeout(function () {}, 50);
-		});
+		await page.click(`#${odds[i]}`);
+		await page.waitForTimeout(100);
 	}
 };
