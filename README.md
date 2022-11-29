@@ -9,8 +9,10 @@ npm install
 ### Run
 #### [simon-says](https://weslleyaraujo.github.io/react-simon-says/)
 ```npx playwright test simon-says --headed```
-<img src="images/simon-says.png" width="200">
+</br>
+<a href="https://weslleyaraujo.github.io/react-simon-says/"><img src="images/simon-says.png" width="300"></a>
 
 #### [drench2](http://www.flashbynight.com/drench2/)
 ```npx playwright test drench2 --headed```
-<img src="images/drench2.png" width="200">
+</br>
+<a href="http://www.flashbynight.com/drench2/"><img src="images/drench2.png" width="300"></a>
