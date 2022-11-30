@@ -4,6 +4,7 @@
 git clone https://github.com/jaroslavasd/hackathon2022-solutions-playwright.git
 cd hackathon2022-solutions-playwright
 npm install
+npx playwright install
 ```
 
 ### Run
