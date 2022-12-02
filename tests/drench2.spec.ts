@@ -10,6 +10,8 @@ const Color = {
   WHITE: {name: 'white', code: 'white'},
 };
 
+const clickableColors = Object.keys(Color).filter(key => Color[key].id).map(key => Color[key])
+
 test("Play The Game - Drench2", async ({ page }) => {
 	await page.goto("http://www.flashbynight.com/drench2/");
 
@@ -17,14 +19,23 @@ test("Play The Game - Drench2", async ({ page }) => {
 	await page.waitForSelector(play9x9ButtonSelector)
 	await page.click(play9x9ButtonSelector);
 
-  console.log('CALCULATING...')
-  const winnerActions = calculateWinner(await getState(page))
+  const maxMovesSelector = '#tMoveBox'
+  await page.waitForSelector(maxMovesSelector)
+  const maxMovesLabel = await page.$eval(maxMovesSelector, e => e.textContent)
+
+  const startState = await getState(page)
   
-  console.log(`WINNER (${winnerActions.length}) - ${winnerActions.map(action => action.name)}`)
- 
+  console.log('CALCULATING...')
+  const startTime = new Date().getTime();
+  const winnerActions = calculateWinner(startState)
+  const endTime = new Date().getTime();
+  const duration = ((endTime - startTime)/1000).toFixed(1)
+  
+  outputResult(winnerActions, maxMovesLabel, duration)
+
   console.log('CLICKING...')
   await clickColors(winnerActions, page)
-  
+
   console.log('END')
 
   // just to keep window open
@@ -44,7 +55,8 @@ const calculateWinner = initialState => {
       if(isSuccess) {
         return
       }
-      const colorsToClickAndPositions = getClickableColorsAndPosition(stateWithActions.state)
+
+      const colorsToClickAndPositions = getClickableColorsAndPosition(stateWithActions)
       const itemsToChangeArray = getStateDifferenceAfterClick(colorsToClickAndPositions, stateWithActions.state)
 
       itemsToChangeArray.forEach(item => {
@@ -81,13 +93,14 @@ const getState = async page => {
 const setState = (arrayToChange, currentState) =>
   currentState.map((item, index) => arrayToChange.includes(index) ? Color.WHITE : item)
 
-const getClickableColorsAndPosition = state => {
-  const clickableColors = Object.keys(Color)
-    .filter(key => Color[key].id).map(key => Color[key])
-    
+const getClickableColorsAndPosition = stateWithActions => {
   let itemsToClick: any[] = [];
-  clickableColors.forEach(color => {
-    let position = getWhiteDirectsNeighboursOfColor(color, state)
+  
+  let availableColors = stateWithActions.actions.length > 0 ? 
+    clickableColors.filter(color => color != stateWithActions.actions.slice(-1)[0]) : clickableColors
+
+  availableColors.forEach(color => {
+    let position = getWhiteDirectsNeighboursOfColor(color, stateWithActions.state)
     if(position.length > 0) {
       itemsToClick.push({color, position})
     }
@@ -116,8 +129,9 @@ const getSequentialNeiboughtsByCells = (cells, state) => {
     while(neighbours.length > 0) {
       let newNeighbours: Number[] = [];
       neighbours.forEach(neighbour => {  
-        newNeighbours = getDirectsNeighboursOfSameColorByCell(neighbour, state)
-          .filter(obj => final.indexOf(obj) == -1)
+        newNeighbours = newNeighbours.concat(
+          getDirectsNeighboursOfSameColorByCell(neighbour, state)
+            .filter(obj => final.indexOf(obj) == -1))
           
         if(newNeighbours.length > 0) {
           final = final.concat(newNeighbours)
@@ -140,7 +154,11 @@ const getStateDifferenceAfterClick = (itemsToClick, state) => itemsToClick.map(i
 const getColorByCode = colorCode =>
   colorCode && Color[Object.keys(Color).find(color => Color[color].code === colorCode)!]
 
-const getIndexesOfWhite = state =>
+const convertStateToColorsByName = state => {
+  state.map(color => Color[Object.keys(Color).find(key => Color[key].name === color)!])
+}
+
+const getIndexesOfWhite = state => 
   state.map((color, index) => color === Color.WHITE ? index : '').filter(String)
 
 const isSolved = state => 
@@ -160,4 +178,16 @@ const clickColors = async (arrayToClick, page) => {
     await page.click(`#${arrayToClick[i].id}`)
     await page.waitForTimeout(500);
   }
+}
+
+const outputResult = (winner, maxMovesLabel, duration) => {
+  const maxMoves = parseInt(maxMovesLabel!)
+  const foundSoutionIn = winner.length
+  let isSuccessful = maxMoves >= foundSoutionIn
+
+  console.log(
+    (isSuccessful ? 'SUCCESS' : 'FAIL') + 
+    ' in ' + duration + 's and ' + foundSoutionIn + ' moves (max ' + maxMoves + '): ' +
+    winner.map(action => action.name)
+  )
 }
