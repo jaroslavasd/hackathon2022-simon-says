@@ -187,7 +187,7 @@ const outputResult = (winner, maxMovesLabel, duration) => {
 
   console.log(
     (isSuccessful ? 'SUCCESS' : 'FAIL') + 
-    ' in ' + duration + 's and ' + foundSoutionIn + ' moves (max ' + maxMoves + '): ' +
-    winner.map(action => action.name)
+    ' in ' + duration + 's and ' + foundSoutionIn + ' moves (max ' + maxMoves + '):' +
+    winner.map(action => " " + action.name)
   )
 }
