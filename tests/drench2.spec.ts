@@ -13,11 +13,11 @@ const Color = {
 const clickableColors = Object.keys(Color).filter(key => Color[key].id).map(key => Color[key])
 
 test("Play The Game - Drench2", async ({ page }) => {
-	await page.goto("http://www.flashbynight.com/drench2/");
+  await page.goto("http://www.flashbynight.com/drench2/");
 
   const play9x9ButtonSelector = '#butang1'
-	await page.waitForSelector(play9x9ButtonSelector)
-	await page.click(play9x9ButtonSelector);
+  await page.waitForSelector(play9x9ButtonSelector)
+  await page.click(play9x9ButtonSelector);
 
   const maxMovesSelector = '#tMoveBox'
   await page.waitForSelector(maxMovesSelector)
@@ -30,7 +30,7 @@ test("Play The Game - Drench2", async ({ page }) => {
   const winnerActions = calculateWinner(startState)
   const endTime = new Date().getTime();
   const duration = ((endTime - startTime)/1000).toFixed(1)
-  
+ 
   outputResult(winnerActions, maxMovesLabel, duration)
 
   console.log('CLICKING...')
@@ -39,7 +39,7 @@ test("Play The Game - Drench2", async ({ page }) => {
   console.log('END')
 
   // just to keep window open
-	await new Promise(() => {});
+  await new Promise(() => {});
 });
 
 const calculateWinner = initialState => {
